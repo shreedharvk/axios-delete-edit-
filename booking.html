@@ -2,10 +2,10 @@
 <html>
 <head>
     <title>User Information Form</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>BOOKING APPOINTMENTS</h1>
+    <h1>User Information Form</h1>
     <form id="userForm">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required><br><br>
@@ -13,54 +13,84 @@
         <label for="email">Email Address:</label>
         <input type="email" id="email" name="email" required><br><br>
         
-        <label for ="phone">Phone Number:</label>
+        <label for="phone">Phone Number:</label>
         <input type="tel" id="phone" name="phone" required><br><br>
         
+        <input type="hidden" id="userId">
         <input type="button" value="Submit" onclick="submitForm()">
-        <input type="button" value="Edit" onclick="editForm()">
-        <input type="button" value="Delete" onclick="deleteForm()">
     </form>
     
     <h2>Stored Details:</h2>
-    <div id="storedDetails"></div>
+    <ul id="userList"></ul>
     
     <script>
         function submitForm() {
+            var userId = document.getElementById("userId").value;
             var name = document.getElementById("name").value;
             var email = document.getElementById("email").value;
             var phone = document.getElementById("phone").value;
             
-            if (name && email && phone) {
-                var formData = { name: name, email: email, phone: phone };
+            if (userId) {
+                if (name && email && phone) {
+                    var formData = { name: name, email: email, phone: phone };
 
-                axios.post('https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata', formData)
-                .then((response) => {
-                    showOutput(response);
-                  })
-                  .catch((error) => {
-                    errorHandling(error);
-                  });
+                    axios.put(`https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata/${userId}`, formData)
+                        .then((response) => {
+                            showStoredDetails();
+                            clearForm();
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                } else {
+                    alert("Please fill in all the fields.");
+                }
+            } else {
+                alert("No user selected for editing.");
             }
-            
         }
 
-       
         function showStoredDetails() {
             axios.get('https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata')
-                .then(function (response) {
+                .then((response) => {
                     var details = response.data;
-                    var detailsHtml = "<ul>";
+                    var userList = document.getElementById("userList");
+                    userList.innerHTML = "";
 
                     for (var i = 0; i < details.length; i++) {
-                        detailsHtml += "<li>Name: " + details[i].name + ", Email: " + details[i].email + ", Phone: " + details[i].phone + "</li>";
+                        var listItem = document.createElement("li");
+                        listItem.innerHTML = `Name: ${details[i].name}, Email: ${details[i].email}, Phone: ${details[i].phone} <button class="edit-button" onclick="editUser('${details[i]._id}', '${details[i].name}', '${details[i].email}', '${details[i].phone}')">Edit</button> <button class="delete-button" onclick="deleteUser('${details[i]._id}')">Delete</button>`;
+                        userList.appendChild(listItem);
                     }
-
-                    detailsHtml += "</ul>";
-                    document.getElementById("storedDetails").innerHTML = detailsHtml;
                 })
                 .catch((error) => {
-                    errorHandling(error);
-                  });
+                    console.log(error);
+                });
+        }
+
+        function editUser(userId, name, email, phone) {
+            document.getElementById("userId").value = userId;
+            document.getElementById("name").value = name;
+            document.getElementById("email").value = email;
+            document.getElementById("phone").value = phone;
+        }
+
+        function deleteUser(userId) {
+            axios.delete(`https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata/${userId}`)
+                .then((response) => {
+                    showStoredDetails();
+                    clearForm();
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+
+        function clearForm() {
+            document.getElementById("userId").value = "";
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("phone").value = "";
         }
 
         showStoredDetails();
