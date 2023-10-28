@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Information Form</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+</head>
+<body>
+    <h1>BOOKING APPOINTMENTS</h1>
+    <form id="userForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for ="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required><br><br>
+        
+        <input type="button" value="Submit" onclick="submitForm()">
+        <input type="button" value="Edit" onclick="editForm()">
+        <input type="button" value="Delete" onclick="deleteForm()">
+    </form>
+    
+    <h2>Stored Details:</h2>
+    <div id="storedDetails"></div>
+    
+    <script>
+        function submitForm() {
+            var name = document.getElementById("name").value;
+            var email = document.getElementById("email").value;
+            var phone = document.getElementById("phone").value;
+            
+            if (name && email && phone) {
+                var formData = { name: name, email: email, phone: phone };
+
+                axios.post('https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata', formData)
+                .then((response) => {
+                    showOutput(response);
+                  })
+                  .catch((error) => {
+                    errorHandling(error);
+                  });
+            }
+            
+        }
+
+       
+        function showStoredDetails() {
+            axios.get('https://crudcrud.com/api/7f0bd98c2fce4c998833733ff8f9418d/appdata')
+                .then(function (response) {
+                    var details = response.data;
+                    var detailsHtml = "<ul>";
+
+                    for (var i = 0; i < details.length; i++) {
+                        detailsHtml += "<li>Name: " + details[i].name + ", Email: " + details[i].email + ", Phone: " + details[i].phone + "</li>";
+                    }
+
+                    detailsHtml += "</ul>";
+                    document.getElementById("storedDetails").innerHTML = detailsHtml;
+                })
+                .catch((error) => {
+                    errorHandling(error);
+                  });
+        }
+
+        showStoredDetails();
+    </script>
+</body>
+</html>
